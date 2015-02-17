@@ -1,4 +1,5 @@
 import utils as ut
+import math as math
 
 ''' the data in read and stored in a object from this class'''
 class Dataset(object):
@@ -24,6 +25,9 @@ class Dataset(object):
 					cl.add(line_info[-1])
 				self.class_labels = list(cl)
 		self.cast_to_float_numeric_attributes()
+		# TODO: remove .elements
+		self.training_set = []
+		self.test_set = []
 
 	def get_attribute_names(self):
 		return self.attribute_names
@@ -33,6 +37,17 @@ class Dataset(object):
 
 	def get_elements(self):
 		return self.elements
+
+	def get_training_set(self):
+		return self.training_set
+
+	def get_test_set(self):
+		return self.test_set
+
+	def set_cross_validation(self, percentage): # percentage -> [0,1]
+		delim = int(percentage*len(self.elements)) # NOTE: no bad case (especially for small data?)
+		self.training_set = self.elements[0:delim-1]
+		self.test_set = self.elements[delim:]
 
 	def get_class_labels(self):
 		return self.class_labels

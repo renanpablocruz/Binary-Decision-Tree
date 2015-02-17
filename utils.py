@@ -11,6 +11,10 @@ def xLog(x, b):
 	else:
 		return 0.0
 
+def partition(seq, delim):
+	return (seq[0:delim-1], seq[delim:])
+
+
 def partitions(seq):
 	return [(seq[0:n], seq[n:]) for n in range(1, len(seq))]
 

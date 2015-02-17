@@ -29,6 +29,12 @@ class BDTree(object):
 			else:
 				raise Exception("Element cannot be classified") # print something else to help debug
 
+	def re_substituition_error(data):
+		pass
+
+	def generalization_error(data):
+		pass
+
 	def print_tree(self, level=0): # dfs
 		prefix = "|"*level
 		if self.label != None:

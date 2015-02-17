@@ -140,11 +140,19 @@ dataset3 = ps.Dataset('sample1.csv')
 dataset3.discretize_dataset(6, 'equal_width')
 # new_values = [elem['class_size'] for elem in dataset3.get_elements()]
 # print new_values
-btree = bdt.build_tree(dataset3, imf, dl)
-btree.print_tree()
+btree3 = bdt.build_tree(dataset3, imf, dl)
+btree3.print_tree()
+
+print "################"
+
+dataset4 = ps.Dataset('dataset.data')
+dataset4.discretize_dataset(10, 'equal_width')
+dataset4.set_cross_validation(0.2)
+btree4 = bdt.build_tree(dataset4, 'info', '###')
+btree4.print_tree()
 # print type(math.floor(3.3))
 # l = [1,2,3,4,5,5,6]
 # n = 2
 # print [l[i:i+n] for i in xrange(0, len(l), n)]
 # print ut.partitions([1,2,3,4,5,6])
-print list(set([9,0,45,4,2,7,1,2,3,89]))
+# print list(set([9,0,45,4,2,7,1,2,3,89]))
