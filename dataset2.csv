@@ -1,0 +1,12 @@
+tid,refund,marital status,taxable income,cheat
+N,C,C,N,C
+1,yes,Single,125000,No
+2,no,Married,100000,No
+3,no,Single,70000,No
+4,yes,Married,120000,No
+5,no,Divorced,95000,Yes
+6,no,Married,60000,No
+7,yes,Divorced,220000,No
+8,no,Single,85000,Yes
+9,no,Married,75000,No
+10,no,Single,90000,Yes
