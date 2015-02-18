@@ -1,5 +1,6 @@
 from __future__ import division # all divisions are floating divisions
 import impurity_measures as im
+import math
 #import data_parser as dp
 
 class BDTree(object):
@@ -64,19 +65,40 @@ class BDTree(object):
 			self.right_node.print_tree2(level)
 
 # TODO: this function really belongs to here?
-def build_tree(data, function, default_label):
+def build_tree(data, function, default_label, threshold):
 
 	find_label = default_label
 
 	if data.all_elements_have_same_label():
-		return BDTree(default_label, class_label=data.common_label(), )
+		return BDTree(default_label, class_label=data.common_label())
 	else:
-		to_split, how_to_split = im.best_binary_split(data, function)
+		to_split, how_to_split = im.best_binary_split(data, function, threshold)
 		if not to_split:
 			return BDTree(default_label, class_label=find_label)
 		else:
 			_, [fv_A, fv_B], img = how_to_split
 			dataset_A, dataset_B = data.split(fv_A, fv_B)
-			return BDTree(default_label, tests=[fv_A, fv_B], child_nodes=[build_tree(dataset_A, function, find_label), build_tree(dataset_B, function, default_label)])
+			return BDTree(default_label, tests=[fv_A, fv_B], child_nodes=[build_tree(dataset_A, function, find_label, threshold), build_tree(dataset_B, function, default_label, threshold)])
 
-def MDL():
+def helper_MDL_tree(btree, log2n, log2k):
+	if btree.label != None:
+		return log2k
+	else:
+		return log2n + helper_MDL_tree(btree.left_node, log2n, log2k) + helper_MDL_tree(btree.right_node, log2n, log2k)
+
+def MDL_tree(btree, data):
+	n = len(data.get_attribute_names()[:-1])
+	k = len(data.get_class_labels())
+	log2n = math.log(n,2)
+	log2k = math.log(k,2)
+	return helper_MDL_tree(btree, log2n, log2k)
+
+def MDL_data(btree, data):
+	m = len(data.get_elements())
+	k = len(data.get_class_labels())
+	log2mk = math.log(m*k, 2)
+	class_attribute_id = data.attribute_names[-1]
+	return log2mk*sum([1 for elem in data.get_elements() if btree.classify_element(elem) != elem[class_attribute_id]])
+
+def MDL(btree, data):
+	return MDL_tree(btree, data) + MDL_data(btree, data)

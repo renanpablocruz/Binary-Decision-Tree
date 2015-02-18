@@ -132,20 +132,20 @@ def split_argument(type, table, function, min_threshold = 0):
 
 # return the attribute to split and how to partitionate
 # NOTE: kept for version control safety
-def best_binary_split2(data, function):
-	# TODO if all elements have the same class label, then not split and return this class label
-	attributes = data.get_attribute_names()[:-1] # removing target class # TODO: encapsulate this
-	types = data.get_attribute_types()[:-1]
-	tables_by_attribute = [ct.contigency_tables_from_feature(att, data) for att in attributes] #TODO: encapsulate this???
-	analysis_by_attribute = [split_categorical_argument(tables, function) for tables in tables_by_attribute]
-	candidates_to_split = [analysis for analysis in analysis_by_attribute if analysis[0] == True] # if no attribute should be split?
-	if len(candidates_to_split) == 0:
-		return (False, [])
-	else:
-		best_candidate_to_split = sorted(candidates_to_split, key=itemgetter(2))[-1]
-		return (True, best_candidate_to_split) # fix this return vale (booleans are redundant)
+# def best_binary_split2(data, function):
+# 	# TODO if all elements have the same class label, then not split and return this class label
+# 	attributes = data.get_attribute_names()[:-1] # removing target class # TODO: encapsulate this
+# 	types = data.get_attribute_types()[:-1]
+# 	tables_by_attribute = [ct.contigency_tables_from_feature(att, data) for att in attributes] #TODO: encapsulate this???
+# 	analysis_by_attribute = [split_categorical_argument(tables, function) for tables in tables_by_attribute]
+# 	candidates_to_split = [analysis for analysis in analysis_by_attribute if analysis[0] == True] # if no attribute should be split?
+# 	if len(candidates_to_split) == 0:
+# 		return (False, [])
+# 	else:
+# 		best_candidate_to_split = sorted(candidates_to_split, key=itemgetter(2))[-1]
+# 		return (True, best_candidate_to_split) # fix this return vale (booleans are redundant)
 
-def best_binary_split(data, function):
+def best_binary_split(data, function, threshold):
 	# TODO if all elements have the same class label, then not split and return this class label
 	attributes = data.get_attribute_names()[:-1] # removing target class # TODO: encapsulate this
 	types = dict(zip(attributes, data.get_attribute_types()[:-1]))
@@ -156,4 +156,7 @@ def best_binary_split(data, function):
 		return (False, [])
 	else:
 		best_candidate_to_split = sorted(candidates_to_split, key=itemgetter(2))[-1]
-		return (True, best_candidate_to_split) # fix this return vale (booleans are redundant)
+		if best_candidate_to_split[2] < threshold:
+			return (False, [])
+		else:
+			return (True, best_candidate_to_split) # fix this return vale (booleans are redundant)

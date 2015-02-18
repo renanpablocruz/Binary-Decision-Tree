@@ -9,7 +9,7 @@ import binary_decision_tree as bdt
 def main(training_data, testing_data, split_function, threshold):
 	training_set = ps.Dataset(training_data)
 	training_set.discretize_dataset('equal_width') # how to decide this?
-	btree = bdt.build_tree(training_set, split_function, '###')
+	btree = bdt.build_tree(training_set, split_function, '###', threshold)
 
 	testing_set = ps.Dataset(testing_data)
 	testing_set.discretize_dataset_given_bins(training_set.get_bins())
@@ -20,15 +20,17 @@ def main(training_data, testing_data, split_function, threshold):
 	# print "Generalization error:", btree.classification_error(testing_set)
 	# # MDL
 	# print "MDL:","x","bits"
+	# the data is split while the impurity_measure_gain is bigger than the threshold
 
 	btree.print_tree2()
 
 	# re-substituition
-	print "Re-subsitution error:", '{0:.2g}'.format(btree.classification_error(training_set)*100), "%"
+	print "Re-subsitution error:", "{0:.2f}".format(btree.classification_error(training_set)*100), "%"
 	# generalization
-	print "Generalization error:", '{0:.2g}'.format(btree.classification_error(testing_set)*100), "%"
+	print "Generalization error:", "{0:.2f}".format(btree.classification_error(testing_set)*100), "%"
 	# MDL
-	print "MDL:","x","bits"
+	# Only training set was used
+	print "MDL:", "{0:.2f}".format(bdt.MDL(btree, training_set)), "bits"
 
 if __name__ == '__main__':
-	main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+	main(sys.argv[1], sys.argv[2], sys.argv[3], float(sys.argv[4]))
