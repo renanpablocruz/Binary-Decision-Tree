@@ -1,3 +1,4 @@
+from __future__ import division # all divisions are floating divisions
 import impurity_measures as im
 import collections
 import contigency_table as ct
@@ -93,10 +94,10 @@ import math
 # print a
 # print b
 # print c
-dataset = ps.Dataset('dataset.data')
-# print len(list(set([elem['class_size'] for elem in dataset.get_elements()])))
 
-dataset2 = ps.Dataset('dataset2.csv')
+# print len(list(set([elem['class_size'] for elem in dataset.get_elements()])))
+# dataset = ps.Dataset('dataset.data')
+# dataset2 = ps.Dataset('dataset2.csv')
 # dataset2 = ps.Dataset('dataset.data')
 # print dataset.get_class_labels()
 # print dataset.get_attribute_names()
@@ -131,28 +132,47 @@ dl = '###'
 # disc2 = ut.get_bins_for_discretization([1,2,3,4,5,6,7,8,9,10], 4, 'equal_freq')
 # print disc2
 # print ut.discretized_value(3.5, disc2)
-dataset3 = ps.Dataset('sample1.csv')
+
 # old_values = [elem['class_size'] for elem in dataset3.get_elements()]
 # print old_values
 # bins = ut.get_bins_for_discretization(old_values, 3, 'equal_width')
 # print bins
-# #dataset3.discretize_attribute('class_size', 3, 'equal_width')
-dataset3.discretize_dataset(6, 'equal_width')
+# #dataset3.discretize_attribute('class_size', 'equal_width', num_bins=3)
+
 # new_values = [elem['class_size'] for elem in dataset3.get_elements()]
 # print new_values
-btree3 = bdt.build_tree(dataset3, imf, dl)
-btree3.print_tree()
+# dataset3 = ps.Dataset('sample1.csv')
+# dataset3.discretize_dataset(6, 'equal_width')
+# btree3 = bdt.build_tree(dataset3, imf, dl)
+# btree3.print_tree()
 
-print "################"
+# print "################"
 
-dataset4 = ps.Dataset('dataset.data')
-dataset4.discretize_dataset(10, 'equal_width')
-dataset4.set_cross_validation(0.2)
-btree4 = bdt.build_tree(dataset4, 'info', '###')
-btree4.print_tree()
+# dataset4 = ps.Dataset('dataset.data')
+# dataset4.discretize_dataset('equal_width')
+# btree4 = bdt.build_tree(dataset4, 'info', '###')
+# btree4.print_tree()
+
+# dataset5 = ps.Dataset('anneal.data.csv')
+# dataset5.discretize_dataset('equal_width')
+# btree5 = bdt.build_tree(dataset5, 'info', '###')
+# btree5.print_tree()
+
 # print type(math.floor(3.3))
 # l = [1,2,3,4,5,5,6]
 # n = 2
 # print [l[i:i+n] for i in xrange(0, len(l), n)]
 # print ut.partitions([1,2,3,4,5,6])
 # print list(set([9,0,45,4,2,7,1,2,3,89]))
+
+# dataset5 = ps.Dataset('cheat.csv')
+# #print "data has", len(dataset5.elements), "elements"
+# dataset5.discretize_dataset('equal_width')
+# btree5 = bdt.build_tree(dataset5, 'info', '###')
+# btree5.print_tree()
+
+# #print "data has", len(dataset5.elements), "elements"
+
+# for elem in dataset5.elements:
+# 	print elem
+# 	print btree5.classify_element(elem)

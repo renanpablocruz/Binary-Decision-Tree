@@ -1,5 +1,6 @@
 import utils as ut
 import math as math
+import copy
 
 ''' the data in read and stored in a object from this class'''
 class Dataset(object):
@@ -8,7 +9,7 @@ class Dataset(object):
 		self.attribute_names = []
 		self.attribute_types = []
 		self.class_labels = []
-		self.bins = [] # only for numeric values with num_feature_values > num_bins
+		self.bins = {} # only for numeric values with num_feature_values > num_bins
 		# TODO: the numeric values should be saved as float
 		# TODO AFTER: remove float() from discretize_attribute
 		if(data_file != None):
@@ -25,32 +26,18 @@ class Dataset(object):
 					cl.add(line_info[-1])
 				self.class_labels = list(cl)
 		self.cast_to_float_numeric_attributes()
-		# TODO: remove .elements
-		self.training_set = []
-		self.test_set = []
 
 	def get_attribute_names(self):
-		return self.attribute_names
+		return list(self.attribute_names)
 
 	def get_attribute_types(self):
-		return self.attribute_types
+		return list(self.attribute_types)
 
 	def get_elements(self):
-		return self.elements
-
-	def get_training_set(self):
-		return self.training_set
-
-	def get_test_set(self):
-		return self.test_set
-
-	def set_cross_validation(self, percentage): # percentage -> [0,1]
-		delim = int(percentage*len(self.elements)) # NOTE: no bad case (especially for small data?)
-		self.training_set = self.elements[0:delim-1]
-		self.test_set = self.elements[delim:]
+		return list(self.elements)
 
 	def get_class_labels(self):
-		return self.class_labels
+		return list(self.class_labels)
 
 	def get_values_of_attribute(self, attribute):
 		fv = set([])
@@ -58,15 +45,23 @@ class Dataset(object):
 			fv.add(elem[attribute])
 		return list(fv) # it's already sorted
 
-	def create_copy_with_elem(self): # TODO: probably will become with specific elements
+	def get_bins(self):
+		return copy.copy(self.bins)
+
+	# def copy(self):
+	# 	pass
+
+	def copy_with_no_elem(self): # TODO: probably will become with specific elements
 		copy = Dataset()
 		copy.attribute_names = list(self.attribute_names) # copying a list
 		copy.attribute_types = list(self.attribute_types)
 		copy.class_labels = list(self.class_labels)
+		# self.elements = []
+		# self.bins = []
 		return copy
 
 	def remove_elements(self, elements):
-		datasetB = self.create_copy_with_elem()
+		datasetB = self.copy_with_no_elem()
 		for elem in elements:
 			self.elements.remove(elem)
 
@@ -78,28 +73,37 @@ class Dataset(object):
 	def split(self, fv_A, fv_B):
 		attribute = fv_B.feature
 		fv = fv_B.feature_values
-		# Refactor this function. It's too inefficient copy the dataset
-		copy = self.create_copy_with_elem()
+		# Refactor this function. It's too inefficient dest the dataset
+		source = copy.deepcopy(self)
+		dest = self.copy_with_no_elem()
 		elems = []
-		for elem in self.elements:
+		for elem in source.get_elements():
 			if elem[attribute] in fv:
 				elems.append(elem)
-		self.transfer_elements(copy, elems)
-		return [self, copy]
+		source.transfer_elements(dest, elems)
+		return [source, dest]
 
-	def discretize_attribute(self, attribute, num_bins, method):
+	def discretize_attribute(self, attribute, method, num_bins=10):
 		# will alter for sure the dataset
 		# the attribute must be numeric
 		if len(set([elem[attribute] for elem in self.elements])) > num_bins:
 			bins = ut.get_bins_for_discretization([elem[attribute] for elem in self.elements], num_bins, method)
-			self.bins.append({attribute:bins})
+			self.bins[attribute] = bins
 			for elem in self.elements:
 				elem[attribute] = ut.discretized_value(elem[attribute], bins)
 
-	def discretize_dataset(self, num_bins, method):
+	def discretize_attribute_given_bins(self, attribute, attribute_bins):
+		for elem in self.elements:
+			elem[attribute] = ut.discretized_value(elem[attribute], attribute_bins)
+
+	def discretize_dataset(self, method, num_bins=10):
 		for i in range(0, len(self.attribute_types)):
 			if self.attribute_types[i] == 'N':
-				self.discretize_attribute(self.attribute_names[i], num_bins, method)
+				self.discretize_attribute(self.attribute_names[i], method, num_bins)
+
+	def discretize_dataset_given_bins(self, bins):
+		for att in bins.keys():
+			self.discretize_attribute_given_bins(att, bins[att])
 
 	def all_elements_have_same_label(self):
 		# print "@@@@@@@@@@@@@@@", self.attribute_names[-1], "@@@@@@@@@@@@@@@@@@"

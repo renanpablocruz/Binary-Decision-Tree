@@ -60,6 +60,9 @@ class ContigencyTable(object):
 	def test_element(self, elem):
 		return elem[self.feature] in self.feature_values
 
+	def print_in_tree(self):
+		return self.feature + " " + str(self.feature_values)
+
 ###################################################################################################################
 # functions for dealing with contigency tables
 def contigency_tables_from_feature(feature, data):

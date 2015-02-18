@@ -1,9 +1,11 @@
+from __future__ import division # all divisions are floating divisions
 import impurity_measures as im
 #import data_parser as dp
 
 class BDTree(object):
-	def __init__(self, class_label=None, tests=None, child_nodes=None):
+	def __init__(self, default_label, class_label=None, tests=None, child_nodes=None):
 		self.label = None
+		self.default_label = default_label
 		self.attribute = None
 		self.left_test = None
 		self.right_test = None
@@ -22,18 +24,18 @@ class BDTree(object):
 	 	if self.label != None:
 	 		return self.label
 	 	else:
-	 		if left_test.test_element(elem):
-				return left_test.classify_element(elem)
-			elif right_test.test_element(elem):
-				return right_test.classify_element(elem)
+	 		if self.left_test.test_element(elem):
+				return self.left_node.classify_element(elem)
+			elif self.right_test.test_element(elem):
+				return self.right_node.classify_element(elem)
 			else:
-				raise Exception("Element cannot be classified") # print something else to help debug
+				# raise Exception("Element cannot be classified", elem) # print something else to help debug
+				return self.default_label
 
-	def re_substituition_error(data):
-		pass
-
-	def generalization_error(data):
-		pass
+	def classification_error(self, data):
+		class_attribute_id = data.attribute_names[-1]
+		perc_wrong_classif = sum([1 for elem in data.elements if self.classify_element(elem) != elem[class_attribute_id]]) / len(data.get_elements())
+		return perc_wrong_classif
 
 	def print_tree(self, level=0): # dfs
 		prefix = "|"*level
@@ -48,15 +50,33 @@ class BDTree(object):
 			print prefix, "r", self.right_test
 			self.right_node.print_tree(level)
 
+	def print_tree2(self, level=0): # dfs
+		prefix = "|"*level
+		if self.label != None:
+			print prefix, "(", self.label, ")"
+		else:
+			level += 1
+			# print prefix, "att: ", self.attribute, self.left_test
+			print prefix, self.left_test.print_in_tree()
+			self.left_node.print_tree2(level)
+			# print prefix, "att: ", self.attribute, self.right_test
+			print prefix, self.right_test.print_in_tree()
+			self.right_node.print_tree2(level)
+
 # TODO: this function really belongs to here?
 def build_tree(data, function, default_label):
+
+	find_label = default_label
+
 	if data.all_elements_have_same_label():
-			return BDTree(class_label=data.common_label())
+		return BDTree(default_label, class_label=data.common_label(), )
 	else:
 		to_split, how_to_split = im.best_binary_split(data, function)
 		if not to_split:
-			return BDTree(class_label=default_label)
+			return BDTree(default_label, class_label=find_label)
 		else:
 			_, [fv_A, fv_B], img = how_to_split
 			dataset_A, dataset_B = data.split(fv_A, fv_B)
-			return BDTree(tests=[fv_A, fv_B], child_nodes=[build_tree(dataset_A, function, default_label), build_tree(dataset_B, function, default_label)])
+			return BDTree(default_label, tests=[fv_A, fv_B], child_nodes=[build_tree(dataset_A, function, find_label), build_tree(dataset_B, function, default_label)])
+
+def MDL():

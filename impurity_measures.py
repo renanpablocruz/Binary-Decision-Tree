@@ -82,7 +82,7 @@ def impurity_measure_gain(function, parent, children_nodes):
 
 # given an attribute compute the best split or not split at all
 # table is a list of nodes(contigency tables)
-def split_categorical_argument(table, function, min_e_score = 0):
+def split_categorical_argument(table, function, min_threshold = 0):
 	#print table[0].feature ##################################################
 	all_subsets = ut.powerset(table) # TODO: use indices instead of creating the subsets
 	total_table = ct.sum_nodes(table)
@@ -103,7 +103,7 @@ def split_categorical_argument(table, function, min_e_score = 0):
 	else:
 		return (False, best_partition, best_img)
 
-def split_numeric_argument(table, function, min_e_score = 0):
+def split_numeric_argument(table, function, min_threshold = 0):
 	all_partitions = ut.partitions(table)
 	total_table = ct.sum_nodes(table)
 
@@ -121,7 +121,7 @@ def split_numeric_argument(table, function, min_e_score = 0):
 	else:
 		return (False, best_partition, best_img)
 
-def split_argument(type, table, function, min_e_score = 0):
+def split_argument(type, table, function, min_threshold = 0):
 	# if type == 'C':
 	if type == 'C': # TODO: remember to fix this
 		return split_categorical_argument(table, function)
