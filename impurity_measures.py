@@ -5,8 +5,6 @@ from operator import itemgetter
 
 '''
 	This functions receive ContigencyTable (node) as arguments
-	TODO: class to encapsulate the access to the data
-	TODO: functions for discretizing
 '''
 
 def gini_node(node):
@@ -82,28 +80,28 @@ def impurity_measure_gain(function, parent, children_nodes):
 
 # given an attribute compute the best split or not split at all
 # table is a list of nodes(contigency tables)
-def split_categorical_argument(table, function, min_threshold = 0):
+def split_categorical_argument(table, function, threshold):
 	#print table[0].feature ##################################################
 	all_subsets = ut.powerset(table) # TODO: use indices instead of creating the subsets
 	total_table = ct.sum_nodes(table)
 
 	best_img = 0
-	best_partition = ([], total_table) #TODO: optimize code removing unnecessary
+	best_partition = ([], total_table) #TODO: optimize code by removing unnecessary memory allocations
 
 	for setA in all_subsets:
 		if(setA != table):
 			setB = ut.diff(table, setA)
 			img = impurity_measure_gain(function, total_table, [ct.sum_nodes(setA), ct.sum_nodes(setB)])
-			if(img > best_img): # NOTE: probably the problem was here
+			if(img > best_img):
 				best_img = img
 				best_partition = (ct.sum_nodes(setA), ct.sum_nodes(setB))
 
-	if best_partition != ([], total_table):
+	if best_partition != ([], total_table) and best_img > threshold:
 		return (True, best_partition, best_img)
 	else:
 		return (False, best_partition, best_img)
 
-def split_numeric_argument(table, function, min_threshold = 0):
+def split_numeric_argument(table, function, threshold):
 	all_partitions = ut.partitions(table)
 	total_table = ct.sum_nodes(table)
 
@@ -116,47 +114,36 @@ def split_numeric_argument(table, function, min_threshold = 0):
 				best_img = img
 				best_partition = (ct.sum_nodes(pt[0]), ct.sum_nodes(pt[1]))
 
-	if best_partition != ([], total_table):
+	if best_partition != ([], total_table) and best_img > threshold:
 		return (True, best_partition, best_img)
 	else:
 		return (False, best_partition, best_img)
 
-def split_argument(type, table, function, min_threshold = 0):
-	# if type == 'C':
-	if type == 'C': # TODO: remember to fix this
-		return split_categorical_argument(table, function)
+def split_argument(type, table, function, threshold):
+	if type == 'C':
+		return split_categorical_argument(table, function, threshold)
 	elif type == 'N':
-		return split_numeric_argument(table, function)
+		return split_numeric_argument(table, function, threshold)
 	else:
-		raise Exception("Not valid type of attribute", type)
+		raise Exception("Not valid type of attribute:", type)
 
-# return the attribute to split and how to partitionate
-# NOTE: kept for version control safety
-# def best_binary_split2(data, function):
-# 	# TODO if all elements have the same class label, then not split and return this class label
-# 	attributes = data.get_attribute_names()[:-1] # removing target class # TODO: encapsulate this
-# 	types = data.get_attribute_types()[:-1]
-# 	tables_by_attribute = [ct.contigency_tables_from_feature(att, data) for att in attributes] #TODO: encapsulate this???
-# 	analysis_by_attribute = [split_categorical_argument(tables, function) for tables in tables_by_attribute]
-# 	candidates_to_split = [analysis for analysis in analysis_by_attribute if analysis[0] == True] # if no attribute should be split?
-# 	if len(candidates_to_split) == 0:
-# 		return (False, [])
-# 	else:
-# 		best_candidate_to_split = sorted(candidates_to_split, key=itemgetter(2))[-1]
-# 		return (True, best_candidate_to_split) # fix this return vale (booleans are redundant)
-
-def best_binary_split(data, function, threshold):
-	# TODO if all elements have the same class label, then not split and return this class label
-	attributes = data.get_attribute_names()[:-1] # removing target class # TODO: encapsulate this
-	types = dict(zip(attributes, data.get_attribute_types()[:-1]))
-	tables_by_attribute = { att : ct.contigency_tables_from_feature(att, data) for att in attributes} #TODO: encapsulate this???
-	analysis_by_attribute = [split_argument(types[att], tables_by_attribute[att], function) for att in attributes]
-	candidates_to_split = [analysis for analysis in analysis_by_attribute if analysis[0] == True] # if no attribute should be split?
-	if len(candidates_to_split) == 0:
-		return (False, [])
-	else:
-		best_candidate_to_split = sorted(candidates_to_split, key=itemgetter(2))[-1]
-		if best_candidate_to_split[2] < threshold:
+def best_binary_split(data, function, threshold, unique_split):
+	# this funciton is only called if the elements have not all the same class label
+	attributes = data.get_not_splitted_attributes()
+	if(attributes != []):
+		types = dict(zip(attributes, data.get_attribute_types()[:-1]))
+		tables_by_attribute = { att : ct.contigency_tables_from_feature(att, types[att], data) for att in attributes}
+		analysis_by_attribute = [split_argument(types[att], tables_by_attribute[att], function, threshold) for att in attributes]
+		candidates_to_split = [analysis for analysis in analysis_by_attribute if analysis[0] == True] # if no attribute should be split?
+		if len(candidates_to_split) == 0:
 			return (False, [])
 		else:
-			return (True, best_candidate_to_split) # fix this return vale (booleans are redundant)
+			best_candidate_to_split = sorted(candidates_to_split, key=itemgetter(2))[-1]
+			if best_candidate_to_split[2] <= threshold:
+				return (False, [])
+			else:
+				if unique_split:
+					data.set_attribute_as_splitted(best_candidate_to_split[1][1].feature) # this line makes each attribute divisible once
+				return (True, best_candidate_to_split) # TODO: fix this return value (booleans are redundant)
+	else:
+		return (False, [])

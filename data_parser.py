@@ -10,12 +10,11 @@ class Dataset(object):
 		self.attribute_types = []
 		self.class_labels = []
 		self.bins = {} # only for numeric values with num_feature_values > num_bins
-		# TODO: the numeric values should be saved as float
-		# TODO AFTER: remove float() from discretize_attribute
+		self.not_splitted_attributes = []
 		if(data_file != None):
 			with open(data_file,'r') as f:
 				self.attribute_names = f.readline().strip('\n').split(',')
-				# todo: standardize class 
+				self.not_splitted_attributes = copy.copy(self.attribute_names[:-1])
 				self.attribute_types = f.readline().strip('\n').split(',')
 				# print attribute_names
 				# print attribute_types
@@ -43,15 +42,18 @@ class Dataset(object):
 		fv = set([])
 		for elem in self.get_elements():
 			fv.add(elem[attribute])
-		return list(fv) # it's already sorted
+		return sorted(list(fv)) # it's already sorted
 
 	def get_bins(self):
 		return copy.copy(self.bins)
 
-	# def copy(self):
-	# 	pass
+	def get_not_splitted_attributes(self):
+		return copy.copy(self.not_splitted_attributes)
 
-	def copy_with_no_elem(self): # TODO: probably will become with specific elements
+	def set_attribute_as_splitted(self, att):
+		self.not_splitted_attributes.remove(att)
+
+	def copy_with_no_elem(self):
 		copy = Dataset()
 		copy.attribute_names = list(self.attribute_names) # copying a list
 		copy.attribute_types = list(self.attribute_types)
@@ -97,7 +99,7 @@ class Dataset(object):
 			elem[attribute] = ut.discretized_value(elem[attribute], attribute_bins)
 
 	def discretize_dataset(self, method, num_bins=10):
-		for i in range(0, len(self.attribute_types)):
+		for i in range(0, len(self.attribute_types[:-1])):
 			if self.attribute_types[i] == 'N':
 				self.discretize_attribute(self.attribute_names[i], method, num_bins)
 
@@ -118,6 +120,11 @@ class Dataset(object):
 			elem[attribute] = float(elem[attribute])
 
 	def cast_to_float_numeric_attributes(self):
-		for i in range(0, len(self.attribute_types)):
+		for i in range(0, len(self.attribute_types[:-1])):
 			if self.attribute_types[i] == 'N':
 				self.cast_to_float_attribute(self.attribute_names[i])
+
+	def most_common_class_label(self):
+		att = self.attribute_names[-1]
+		lst = [elem[att] for elem in self.elements]
+		return max(set(lst), key=lst.count)

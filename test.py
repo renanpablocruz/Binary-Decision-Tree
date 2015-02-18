@@ -6,6 +6,7 @@ import utils as ut
 import data_parser as ps
 import binary_decision_tree as bdt
 import math
+import main as main
 
 #from operator import itemgetter, attrgetter, methodcaller
 
@@ -176,3 +177,25 @@ dl = '###'
 # for elem in dataset5.elements:
 # 	print elem
 # 	print btree5.classify_element(elem)
+# main.main("sample1.csv", "sample1.csv", "info", 0.15)
+print "############"
+main.main("cmc.train", "cmc.test", "info", 0.0)
+print "############"
+main.main("cmc.train", "cmc.test", "info", 0.15)
+print "############"
+main.main("cmc.train", "cmc.test", "info", 0.05)
+print "############"
+main.main("cmc.train", "cmc.test", "info", 0.005)
+print "############"
+main.main("cmc.train", "cmc.test", "info", 0.0005)
+print "############"
+main.main("cmc.train", "cmc.test", "info", 0.15, True)
+print "############"
+main.main("cmc.train", "cmc.test", "info", 0.1, True)
+print "############"
+main.main("cmc.train", "cmc.test", "info", 0.05, True)
+print "############"
+main.main("cmc.train", "cmc.test", "info", 0.005, True)
+print "############"
+main.main("cmc.train", "cmc.test", "info", 0.0005, True)
+# print type(ut.n_inf)

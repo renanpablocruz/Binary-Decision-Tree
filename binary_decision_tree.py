@@ -1,6 +1,7 @@
 from __future__ import division # all divisions are floating divisions
 import impurity_measures as im
 import math
+import contigency_table as ct
 #import data_parser as dp
 
 class BDTree(object):
@@ -35,23 +36,10 @@ class BDTree(object):
 
 	def classification_error(self, data):
 		class_attribute_id = data.attribute_names[-1]
-		perc_wrong_classif = sum([1 for elem in data.elements if self.classify_element(elem) != elem[class_attribute_id]]) / len(data.get_elements())
+		perc_wrong_classif = sum([1 for elem in data.get_elements() if self.classify_element(elem) != elem[class_attribute_id]]) / len(data.get_elements())
 		return perc_wrong_classif
 
 	def print_tree(self, level=0): # dfs
-		prefix = "|"*level
-		if self.label != None:
-			print prefix, "label: ", self.label
-		else:
-			level += 1
-			# print prefix, "att: ", self.attribute, self.left_test
-			print prefix, "l", self.left_test
-			self.left_node.print_tree(level)
-			# print prefix, "att: ", self.attribute, self.right_test
-			print prefix, "r", self.right_test
-			self.right_node.print_tree(level)
-
-	def print_tree2(self, level=0): # dfs
 		prefix = "|"*level
 		if self.label != None:
 			print prefix, "(", self.label, ")"
@@ -59,26 +47,27 @@ class BDTree(object):
 			level += 1
 			# print prefix, "att: ", self.attribute, self.left_test
 			print prefix, self.left_test.print_in_tree()
-			self.left_node.print_tree2(level)
+			self.left_node.print_tree(level)
 			# print prefix, "att: ", self.attribute, self.right_test
 			print prefix, self.right_test.print_in_tree()
-			self.right_node.print_tree2(level)
+			self.right_node.print_tree(level)
 
 # TODO: this function really belongs to here?
-def build_tree(data, function, default_label, threshold):
-
-	find_label = default_label
-
+def build_tree(data, function, default_label, threshold, unique_split):
 	if data.all_elements_have_same_label():
 		return BDTree(default_label, class_label=data.common_label())
 	else:
-		to_split, how_to_split = im.best_binary_split(data, function, threshold)
+		to_split, how_to_split = im.best_binary_split(data, function, threshold, unique_split)
 		if not to_split:
-			return BDTree(default_label, class_label=find_label)
+			return BDTree(default_label, class_label=data.most_common_class_label())
 		else:
 			_, [fv_A, fv_B], img = how_to_split
 			dataset_A, dataset_B = data.split(fv_A, fv_B)
-			return BDTree(default_label, tests=[fv_A, fv_B], child_nodes=[build_tree(dataset_A, function, find_label, threshold), build_tree(dataset_B, function, default_label, threshold)])
+			if fv_A.feature_type == 'N':
+				fv_A, fv_B = ct.fix_numeric_contigency_tables(fv_A, fv_B)
+			left_tree = build_tree(dataset_A, function, default_label, threshold, unique_split)
+			right_tree = build_tree(dataset_B, function, default_label, threshold, unique_split)
+			return BDTree(default_label, tests=[fv_A, fv_B], child_nodes=[left_tree, right_tree])
 
 def helper_MDL_tree(btree, log2n, log2k):
 	if btree.label != None:

@@ -93,5 +93,4 @@ def discretized_value(value, bins):
 		if value >= bin[1][0] and value < bin[1][1]:
 			return bin[0]
 	else:
-		print 
 		raise Exception("Not possible to discretize this value", value)
