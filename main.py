@@ -15,7 +15,12 @@ def main(training_data, testing_data, split_function, threshold, unique_split=Fa
 	default_label = training_set.most_common_class_label()
 	#default_label = "###" # to check how many elements are classified by default
 
+
+	#print "class_size type originally", training_set.attribute_types[training_set.attribute_names.index("class_size")]
+
 	btree = bdt.build_tree(training_set, split_function, default_label, threshold, unique_split)
+
+	#print "class_size type after building tree", training_set.attribute_types[training_set.attribute_names.index("class_size")]
 
 	testing_set = ps.Dataset(testing_data)
 	testing_set.discretize_dataset_given_bins(training_set.get_bins())
@@ -40,3 +45,4 @@ def main(training_data, testing_data, split_function, threshold, unique_split=Fa
 
 if __name__ == '__main__':
 	main(sys.argv[1], sys.argv[2], sys.argv[3], float(sys.argv[4]), bool(argv[5]) if len(argv)==6 else False)
+	# boll(any string) returns True

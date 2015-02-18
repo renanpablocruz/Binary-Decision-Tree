@@ -129,11 +129,11 @@ def split_argument(type, table, function, threshold):
 
 def best_binary_split(data, function, threshold, unique_split):
 	# this funciton is only called if the elements have not all the same class label
-	attributes = data.get_not_splitted_attributes()
-	if(attributes != []):
-		types = dict(zip(attributes, data.get_attribute_types()[:-1]))
-		tables_by_attribute = { att : ct.contigency_tables_from_feature(att, types[att], data) for att in attributes}
-		analysis_by_attribute = [split_argument(types[att], tables_by_attribute[att], function, threshold) for att in attributes]
+	available_attributes = data.get_not_splitted_attributes()
+	if(available_attributes != []):
+		types = dict(zip(data.get_attribute_names()[:-1], data.get_attribute_types()[:-1]))
+		tables_by_attribute = { att : ct.contigency_tables_from_feature(att, types[att], data) for att in available_attributes}
+		analysis_by_attribute = [split_argument(types[att], tables_by_attribute[att], function, threshold) for att in available_attributes]
 		candidates_to_split = [analysis for analysis in analysis_by_attribute if analysis[0] == True] # if no attribute should be split?
 		if len(candidates_to_split) == 0:
 			return (False, [])

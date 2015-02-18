@@ -57,12 +57,14 @@ class ContigencyTable(object):
 		return [v for v in self.frequency.values()]
 
 	def test_element(self, elem):
-		if self.feature_type == 'C':
-			return elem[self.feature] in self.feature_values
-		elif self.feature_type == 'N':
-			return self.feature_values[0][0] <= elem[self.feature] and elem[self.feature] < self.feature_values[0][0]
+		att = self.feature
+		att_type = self.feature_type
+		if att_type == 'C':
+			return elem[att] in self.feature_values
+		elif att_type == 'N':
+			return self.feature_values[0][0] <= elem[att] and elem[att] < self.feature_values[0][1]
 		else:
-			raise Exception("Invalid attribute type", feature_type)
+			raise Exception("Invalid attribute type", att_type)
 
 	def print_in_tree(self):
 		return self.feature + " " + str(self.feature_values)

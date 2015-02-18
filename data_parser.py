@@ -14,7 +14,7 @@ class Dataset(object):
 		if(data_file != None):
 			with open(data_file,'r') as f:
 				self.attribute_names = f.readline().strip('\n').split(',')
-				self.not_splitted_attributes = copy.copy(self.attribute_names[:-1])
+				self.not_splitted_attributes = copy.deepcopy(self.attribute_names[:-1])
 				self.attribute_types = f.readline().strip('\n').split(',')
 				# print attribute_names
 				# print attribute_types
@@ -45,27 +45,23 @@ class Dataset(object):
 		return sorted(list(fv)) # it's already sorted
 
 	def get_bins(self):
-		return copy.copy(self.bins)
+		return copy.deepcopy(self.bins)
 
 	def get_not_splitted_attributes(self):
-		return copy.copy(self.not_splitted_attributes)
+		return copy.deepcopy(self.not_splitted_attributes)
 
 	def set_attribute_as_splitted(self, att):
 		self.not_splitted_attributes.remove(att)
 
 	def copy_with_no_elem(self):
 		copy = Dataset()
+		#self.elements
 		copy.attribute_names = list(self.attribute_names) # copying a list
 		copy.attribute_types = list(self.attribute_types)
 		copy.class_labels = list(self.class_labels)
-		# self.elements = []
-		# self.bins = []
+		copy.bins = list(self.bins)
+		copy.not_splitted_attributes = list(self.not_splitted_attributes)
 		return copy
-
-	def remove_elements(self, elements):
-		datasetB = self.copy_with_no_elem()
-		for elem in elements:
-			self.elements.remove(elem)
 
 	def transfer_elements(self, other, elements):
 		for elem in elements:
@@ -73,17 +69,20 @@ class Dataset(object):
 			self.elements.remove(elem)
 
 	def split(self, fv_A, fv_B):
-		attribute = fv_B.feature
-		fv = fv_B.feature_values
-		# Refactor this function. It's too inefficient dest the dataset
-		source = copy.deepcopy(self)
-		dest = self.copy_with_no_elem()
-		elems = []
-		for elem in source.get_elements():
-			if elem[attribute] in fv:
-				elems.append(elem)
-		source.transfer_elements(dest, elems)
-		return [source, dest]
+		if fv_A.feature != fv_B.feature:
+			raise Exception("partition doesn't have same feature", fv_A.feature, "!=", fv_B.feature)
+		else:
+			attribute = fv_B.feature
+			fv = fv_B.feature_values
+			# Refactor this function. It's too inefficient copying the dataset
+			source = copy.deepcopy(self)
+			dest = self.copy_with_no_elem()
+			elems = []
+			for elem in source.get_elements():
+				if elem[attribute] in fv:
+					elems.append(elem)
+			source.transfer_elements(dest, elems)
+			return (source, dest)
 
 	def discretize_attribute(self, attribute, method, num_bins=10):
 		# will alter for sure the dataset

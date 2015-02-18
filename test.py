@@ -178,6 +178,8 @@ dl = '###'
 # 	print elem
 # 	print btree5.classify_element(elem)
 # main.main("sample1.csv", "sample1.csv", "info", 0.15)
+# print "############"
+main.main("sample1.csv", "sample1.csv", "info", 0.15, True)
 print "############"
 main.main("cmc.train", "cmc.test", "info", 0.0)
 print "############"
@@ -198,4 +200,3 @@ print "############"
 main.main("cmc.train", "cmc.test", "info", 0.005, True)
 print "############"
 main.main("cmc.train", "cmc.test", "info", 0.0005, True)
-# print type(ut.n_inf)
